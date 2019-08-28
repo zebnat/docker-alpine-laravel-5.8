@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+    mysql:
+        container_name: mariadb_1
+        image: mariadb:10.4.7-bionic
+        restart: unless-stopped
+        ports:
+            - "3310:3306"
+        env_file:
+            - .env
+
+    php:
+        container_name: phpfpm_1
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        ports:
+            - "9000:9000"
+        volumes:
+            - .:/app:delegated
+        env_file:
+            - .env
+        depends_on:
+            - mysql
+
+    nginx:
+        container_name: nginx_1
+        image: nginx:1.17.3-alpine
+        command: sh -c "chmod 777 -Rc /app/storage && chmod 777 -Rc /app/bootstrap/cache && nginx -g \"daemon off;\""
+        restart: unless-stopped
+        ports:
+            - "8010:80"
+        volumes:
+            - .:/app:delegated
+            - ./etc/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+        depends_on:
+            - php
+              
