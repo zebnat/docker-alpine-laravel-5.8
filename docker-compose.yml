@@ -5,10 +5,10 @@ services:
         container_name: mariadb_1
         image: mariadb:10.4.7-bionic
         restart: unless-stopped
-        ports:
-            - "3310:3306"
+        volumes:
+            - mysql-laravel-data:/var/lib/mysql
         env_file:
-            - .env
+            - .docker.env
 
     php:
         container_name: phpfpm_1
@@ -21,7 +21,7 @@ services:
         volumes:
             - .:/app:delegated
         env_file:
-            - .env
+            - .docker.env
         depends_on:
             - mysql
 
@@ -38,3 +38,5 @@ services:
         depends_on:
             - php
               
+volumes:
+    mysql-laravel-data:
